@@ -25,27 +25,14 @@ public class PasswordResetReferrerPolicyFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (shouldApplyUnsafeUrlReferrerPolicy(request)) {
-            response.setHeader("Referrer-Policy", "unsafe-url");
+        if (isPasswordResetPage(request)) {
+            response.setHeader("Referrer-Policy", "no-referrer");
         }
         filterChain.doFilter(request, response);
     }
 
-    private boolean shouldApplyUnsafeUrlReferrerPolicy(HttpServletRequest request) {
+    private boolean isPasswordResetPage(HttpServletRequest request) {
         String requestUri = request.getRequestURI();
-        if (requestUri == null || !requestUri.endsWith(RESET_PAGE_PATH)) {
-            return false;
-        }
-
-        String level = request.getParameter("level");
-        if (level == null) {
-            return false;
-        }
-
-        try {
-            return Integer.parseInt(level) == REFERRER_LEAK_LEVEL;
-        } catch (NumberFormatException exception) {
-            return false;
-        }
+        return requestUri != null && requestUri.endsWith(RESET_PAGE_PATH);
     }
 }
